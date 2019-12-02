@@ -12,10 +12,8 @@ namespace UnitTest
         public bool LoginWithValidCredentials(string login, string password)
         {
             AccountData account = new AccountData(login, password);
-            //application.Authentication.Login(account);
-            application.Authentication.LoginFrame(account);
 
-            return true;
+            return application.Authentication.Login(account) && application.Authentication.LoginFrame(account);
         }
     }
 }
