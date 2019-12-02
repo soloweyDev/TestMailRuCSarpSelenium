@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using OpenQA.Selenium;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTest
 {
@@ -41,9 +42,9 @@ namespace UnitTest
                 driver.FindElement(By.Id("mailbox:password")).Clear();
                 driver.FindElement(By.Id("mailbox:password")).SendKeys(account.Password);
                 driver.FindElement(By.Id("mailbox:submit")).Click();
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
 
-                // добавить проверку
+                Assert.AreEqual(driver.FindElement(By.Id("PH_user-email")).Text, "csharpselenium@mail.ru");
 
                 return true;
             }
@@ -78,9 +79,11 @@ namespace UnitTest
                 driver.FindElement(By.Name("Password")).Clear();
                 driver.FindElement(By.Name("Password")).SendKeys(account.Password);
                 driver.FindElement(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button")).Click();
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
 
-                // добавить проверку
+                driver.SwitchTo().Frame(0);
+                string s = driver.FindElement(By.Id("PH_user-email")).Text;
+                Assert.AreEqual(s, "csharpselenium@mail.ru");
 
                 return true;
             }

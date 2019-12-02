@@ -11,6 +11,8 @@ namespace UnitTest
 
             LoginTest test = new LoginTest("Firefox", "https://mail.ru/");
             Console.WriteLine("Тест - {0}", test.LoginWithValidCredentials(login, password) ? "прошел" : "не прошел");
+
+            Console.ReadKey();
         }
     }
 }
