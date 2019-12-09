@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
+using TestMailRuCSarpSelenium.AppManager;
 
 namespace UnitTest
 {
@@ -15,9 +16,12 @@ namespace UnitTest
         public LoginHelper Authentication { get; }
         public NavigationHelper Navigation { get; }
         internal AdminHelper Admin { get; private set; }
+        public Loger Log { get; }
 
         private ApplicationManager(string brauser, string url)
         {
+            Log = new Loger($"{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}.log");
+
             setup = new Setup(url);
             BaseURL = setup.GetBaseURL();
             switch (brauser)
@@ -58,11 +62,13 @@ namespace UnitTest
         {
             try
             {
+                Log.Write("Выход из теста");
                 Driver.Quit();
+                Log.Write();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: {0}", e.Message);
+                Log.Write($"Error: {e.Message}");
             }
         }
 
@@ -78,50 +84,81 @@ namespace UnitTest
             return instance.Value;
         }
 
-        public void InputText(string locator, string text)
+        public IWebElement FindElement(By by)
         {
-            if (text != null)
+            IWebElement element = null;
+            Log.Write($"Ищем элемента {by.ToString()}");
+            try
             {
-                IWebElement element = Driver.FindElement(By.Name(locator));
-                element.Clear();
-                element.SendKeys(text);
+                element = Driver.FindElement(by);
+                Log.Write($"Элемент {by.ToString()} найден");
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"ERROR:  {ex.Message}");
+            }
+
+            return element;
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElements(By by)
+        {
+            ReadOnlyCollection<IWebElement> elements = null;
+            Log.Write($"Ищем элемента {by.ToString()}");
+            try
+            {
+                elements = Driver.FindElements(by);
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"ERROR:  {ex.Message}");
+            }
+
+            return elements;
+        }
+
+        public void Click(By by)
+        {
+            Log.Write($"Клик элемента {by.ToString()}");
+            try
+            {
+                FindElement(by).Click();
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"ERROR:  {ex.Message}");
             }
         }
 
-        public void InputTextClick(string locator, string text)
+        public void InputText(By by, string text)
         {
             if (text != null)
             {
-                IWebElement element = Driver.FindElement(By.Name(locator));
-                element.Clear();
-
-                foreach (var c in text)
+                Log.Write($"Очистка элемента {by.ToString()}");
+                try
                 {
-                    element.Click();
-                    element.SendKeys(c.ToString());
+                    FindElement(by).Clear();
+                }
+                catch (Exception ex)
+                {
+                    Log.Write($"ERROR:  {ex.Message}");
+                }
+                if (by.ToString().Contains("password") || by.ToString().Contains("Password")) Log.Write($"Ввод в {by.ToString()} строки *******");
+                else Log.Write($"Ввод в {by.ToString()} строки {text}");
+                try
+                {
+                    FindElement(by).SendKeys(text);
+                }
+                catch (Exception ex)
+                {
+                    Log.Write($"ERROR:  {ex.Message}");
                 }
             }
         }
 
-        public void ClickByName(string text)
+        public void SwitchTo(int i)
         {
-            Driver.FindElement(By.Name(text)).Click();
-        }
-
-        public void ClickByXpath(string text)
-        {
-            Driver.FindElement(By.XPath(text)).Click();
-        }
-
-        public void TextDown(int x, int y, int steps)
-        {
-            Actions actions = new Actions(Driver);
-            actions.MoveByOffset(x, y).Click();
-
-            for (int i = 0; i < steps; ++i)
-                actions.SendKeys(Keys.PageDown).Build().Perform();
-
-            Thread.Sleep(300);
+            Driver.SwitchTo().Frame(i);
         }
     }
 }

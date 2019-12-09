@@ -16,16 +16,16 @@ namespace UnitTest
 
         public void OpenHomePage()
         {
-            if (driver.Url == baseURL) return;
+            if (manager.Driver.Url == baseURL) return;
 
-            driver.Navigate().GoToUrl(baseURL);
+            manager.Driver.Navigate().GoToUrl(baseURL);
         }
 
         public bool WaitElementByName(string name)
         {
             //return new WebDriverWait(driver, TimeSpan.FromSeconds(second)).Until(d => d.FindElements(By.Name(name)).Count > 0);
             int time = 300;
-            while (driver.FindElements(By.Name(name)).Count == 0)
+            while (manager.FindElements(By.Name(name)).Count == 0)
             {
                 Thread.Sleep(time);
                 time += 300;
@@ -43,7 +43,7 @@ namespace UnitTest
         {
             //return new WebDriverWait(driver, TimeSpan.FromSeconds(second)).Until(d => d.FindElements(By.Name(name)).Count > 0);
             int time = 300;
-            while (driver.FindElements(By.Id(name)).Count == 0)
+            while (manager.FindElements(By.Id(name)).Count == 0)
             {
                 Thread.Sleep(time);
                 time += 300;
@@ -60,7 +60,7 @@ namespace UnitTest
         public bool WaitElementByXpath(string name)
         {
             int time = 300;
-            while (driver.FindElements(By.XPath(name)).Count == 0)
+            while (manager.FindElements(By.XPath(name)).Count == 0)
             {
                 Thread.Sleep(time);
                 time += 300;

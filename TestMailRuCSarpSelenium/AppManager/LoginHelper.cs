@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using OpenQA.Selenium;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTest
 {
@@ -20,91 +19,96 @@ namespace UnitTest
 
         public bool IsLogedIn(AccountData account)
         {
-            return IsLogedIn() && driver.FindElement(By.Id("PH_user-email")).Text == (account.Login.ToLower() + "@mail.ru");
+            return IsLogedIn() && manager.FindElement(By.Id("PH_user-email")).Text == (account.Login.ToLower() + "@mail.ru");
         }
 
         public bool Login(AccountData account)
         {
+            bool result = false;
+            manager.Log.Write("Старт теста Login");
+
             try
             {
                 if (IsLogedIn())
                 {
                     if (IsLogedIn(account))
                     {
-                        driver.FindElement(By.Id("PH_logoutLink")).Click();
+                        manager.Click(By.Id("PH_logoutLink"));
                     }
                 }
 
-                driver.FindElement(By.Id("mailbox:login")).Clear();
-                driver.FindElement(By.Id("mailbox:login")).SendKeys(account.Login);
-                driver.FindElement(By.Id("mailbox:submit")).Click();
+                manager.InputText(By.Id("mailbox:login"), account.Login);
+                manager.Click(By.Id("mailbox:submit"));
 
-                driver.FindElement(By.Id("mailbox:password")).Clear();
-                driver.FindElement(By.Id("mailbox:password")).SendKeys(account.Password);
-                driver.FindElement(By.Id("mailbox:submit")).Click();
+                manager.InputText(By.Id("mailbox:password"), account.Password);
+                manager.Click(By.Id("mailbox:submit"));
                 Thread.Sleep(3000);
 
-                Assert.AreEqual(driver.FindElement(By.Id("PH_user-email")).Text, "csharpselenium@mail.ru");
-
-                return true;
+                if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
+                    result = true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка: {ex.Message}");
+                manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
-            return false;
+            string res = result ? "прошел" : "не прошел";
+            manager.Log.Write($"Тест Login завершился с результатом - {res}");
+
+            return result;
         }
 
         public bool LoginFrame(AccountData account)
         {
+            bool result = false;
+            manager.Log.Write("Старт теста LoginFrame");
+
             try
             {
                 if (IsLogedIn())
                 {
                     if (IsLogedIn(account))
                     {
-                        driver.FindElement(By.Id("PH_logoutLink")).Click();
+                        manager.Click(By.Id("PH_logoutLink"));
                     }
                 }
 
-                driver.FindElement(By.Id("PH_authLink")).Click();
+                manager.Click(By.Id("PH_authLink"));
                 Thread.Sleep(2000);
-                var frames = driver.FindElements(By.TagName("iframe"));
-                driver.SwitchTo().Frame(frames.Count - 1);
-                driver.FindElement(By.Name("Login")).Clear();
-                driver.FindElement(By.Name("Login")).SendKeys(account.Login);
-                driver.FindElement(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div[2]//div[3]//div//div[1]//button")).Click();
+                var frames = manager.FindElements(By.TagName("iframe"));
+                manager.SwitchTo(frames.Count - 1);
+                manager.InputText(By.Name("Login"), account.Login);
+                manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div[2]//div[3]//div//div[1]//button"));
 
-                driver.FindElement(By.Name("Password")).Clear();
-                driver.FindElement(By.Name("Password")).SendKeys(account.Password);
-                driver.FindElement(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button")).Click();
+                manager.InputText(By.Name("Password"), account.Password);
+                manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button"));
                 Thread.Sleep(3000);
 
-                driver.SwitchTo().Frame(0);
-                string s = driver.FindElement(By.Id("PH_user-email")).Text;
-                Assert.AreEqual(s, "csharpselenium@mail.ru");
-
-                return true;
+                manager.SwitchTo(0);
+                if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
+                    result = true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка: {ex.Message}");
+                manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
-            return false;
+            string res = result ? "прошел" : "не прошел";
+            manager.Log.Write($"Тест LoginFrame завершился с результатом - {res}");
+
+            return result;
         }
 
         public bool Logoff() // тут нужно еще подумать
         {
-            Console.WriteLine("Проверяем залогинены ли мы.");
+            manager.Log.Write("Проверяем залогинены ли мы.");
             if (IsLogedIn())
             {
-                Console.WriteLine("Мы залогинены. Будем пытаться разлогинится.");
-                driver.FindElement(By.Id("PH_logoutLink")).Click();
+                manager.Log.Write("Мы залогинены. Будем пытаться разлогинится.");
+                manager.Click(By.Id("PH_logoutLink"));
                 return manager.Navigation.WaitElementById("PH_authLink") ? true : false;
             }
-            Console.WriteLine("Мы не залогинены.");
+            manager.Log.Write("Мы не залогинены.");
             return false;
         }
     }

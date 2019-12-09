@@ -5,26 +5,25 @@ namespace UnitTest
     public class BaseHelper
     {
         protected ApplicationManager manager;
-        protected IWebDriver driver;
 
         public BaseHelper(ApplicationManager manager)
         {
             this.manager = manager;
-            driver = manager.Driver;
         }
 
         public bool IsElementPresent(By by)
         {
             try
             {
-                driver.FindElement(by);
+                manager.FindElement(by);
+                manager.Log.Write($"Элемент {by.ToString()} найден");
                 return true;
             }
-            catch (NoSuchElementException)
+            catch (NoSuchElementException ex)
             {
+                manager.Log.Write($"ERROR:  {ex.Message}");
                 return false;
             }
         }
-
     }
 }

@@ -61,6 +61,7 @@
     <Compile Include="AppManager\AdminHelper.cs" />
     <Compile Include="AppManager\ApplicationManager.cs" />
     <Compile Include="AppManager\BaseHelper.cs" />
+    <Compile Include="AppManager\Loger.cs" />
     <Compile Include="AppManager\LoginHelper.cs" />
     <Compile Include="AppManager\NavigationHelper.cs" />
     <Compile Include="Model\AccountData.cs" />
