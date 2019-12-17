@@ -52,6 +52,11 @@ namespace UnitTest
                 manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
+            if (result)
+            {
+                result = Logoff();
+            }
+
             string res = result ? "прошел" : "не прошел";
             manager.Log.Write($"Тест Login завершился с результатом - {res}");
 
@@ -93,13 +98,18 @@ namespace UnitTest
                 manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
+            if (result)
+            {
+                result = Logoff();
+            }
+
             string res = result ? "прошел" : "не прошел";
             manager.Log.Write($"Тест LoginFrame завершился с результатом - {res}");
 
             return result;
         }
 
-        public bool Logoff() // тут нужно еще подумать
+        public bool Logoff()
         {
             manager.Log.Write("Проверяем залогинены ли мы.");
             if (IsLogedIn())
