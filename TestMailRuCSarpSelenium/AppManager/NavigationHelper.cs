@@ -8,8 +8,7 @@ namespace UnitTest
     {
         private readonly string baseURL;
 
-        public NavigationHelper(ApplicationManager manager)
-            : base(manager)
+        public NavigationHelper(ApplicationManager manager) : base(manager)
         {
             baseURL = manager.BaseURL;
         }

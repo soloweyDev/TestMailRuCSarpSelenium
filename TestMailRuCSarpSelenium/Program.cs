@@ -10,10 +10,31 @@ namespace UnitTest
             string password = args[1];
 
             AuthenticationTest test = new AuthenticationTest("Firefox", "https://mail.ru/");
-            Console.WriteLine("Тест LoginWithValidCredentialsAndLoginOff - {0}", test.LoginWithValidCredentialsAndLoginOff(login, password) ? "прошел" : "не прошел");
-            Console.WriteLine("Тест LoginWithoutValidCredentials - {0}", test.LoginWithoutValidCredentials("login", "password") ? "прошел" : "не прошел");
+            Console.WriteLine("Тесты:");
+            Console.Write("  LoginWithValidCredentialsAndLoginOff - ");
+            ViewTestResult(test.LoginWithValidCredentialsAndLoginOff(login, password));
+            Console.Write("  LoginWithoutValidCredentials - ");
+            ViewTestResult(test.LoginWithoutValidCredentials("login", "password"));
 
             Console.ReadKey();
+        }
+
+        static private void ViewTestResult(bool res)
+        {
+            ConsoleColor color = Console.ForegroundColor;
+
+            if (res)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("прошел");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("не прошел");
+            }
+
+            Console.ForegroundColor = color;
         }
     }
 }
