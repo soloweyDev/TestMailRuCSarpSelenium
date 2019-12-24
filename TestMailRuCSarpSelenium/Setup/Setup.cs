@@ -11,24 +11,25 @@ namespace UnitTest
     class Setup
     {
         #region Настройки окружения
-        private readonly string baseURL;
-        //private readonly string pathFirefox = @"C:\Program Files\Mozilla Firefox\firefox.exe";
         private readonly string pathIE = @"C:\Program Files\Internet Explorer\iexplore.exe";
         private readonly string pathEdge = @"C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\MicrosoftEdge.exe";
         private readonly string pathYandex = @"C:\Users\user\AppData\Local\Yandex\YandexBrowser\Application\browser.exe";
-        //private readonly string pathChrome = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
         private readonly string pathOpera = @"C:\Users\user\AppData\Local\Programs\Opera\launcher.exe";
         private readonly string pathSafari = @"C:\Program Files\Safari\Safari.exe";
         #endregion
 
+        private InternetExplorerDriverService IEService;
+        private EdgeDriverService EdgeService;
+
         public IWebDriver driver;
-        //private static ChromeDriverService ChromeService;
-        private static InternetExplorerDriverService IEService;
-        private static EdgeDriverService EdgeService;
+        private XmlSetup xmlSetup;
+        private readonly string baseURL;
 
         public Setup(string url)
         {
             baseURL = url;
+            xmlSetup = XmlSetup.ReadXml();
+            if (xmlSetup == null) xmlSetup = new XmlSetup();
         }
 
         public string GetBaseURL()
@@ -38,7 +39,21 @@ namespace UnitTest
 
         public IWebDriver InitSetupFirefox()
         {
-            return new FirefoxDriver();
+            FirefoxDriver firefox;
+            if (xmlSetup.Path != "")
+            {
+                FirefoxOptions options = new FirefoxOptions();
+                options.BrowserExecutableLocation = xmlSetup.Path;
+                firefox = new FirefoxDriver(options);
+            }
+            else
+            {
+                firefox = new FirefoxDriver();
+            }
+
+            if (xmlSetup.Maximize) firefox.Manage().Window.Maximize();
+            if (xmlSetup.Width != 0 && xmlSetup.Height != 0) firefox.Manage().Window.Size = new System.Drawing.Size(xmlSetup.Width, xmlSetup.Height);
+            return firefox;
         }
 
         public IWebDriver InitSetupIE()

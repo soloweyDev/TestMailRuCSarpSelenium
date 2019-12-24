@@ -19,10 +19,7 @@
         public bool LoginWithoutValidCredentials(string login, string password)
         {
             AccountData account = new AccountData(login, password);
-            bool result = !application.Authentication.Login(account);
-            // возврат на предыдущую страницу
-            application.Driver.Navigate().Back();
-            result = !application.Authentication.LoginFrame(account);
+            bool result = !application.Authentication.Login(account) && !application.Authentication.LoginFrame(account);
             application.Log.Write("Результат набора тестов LoginWithoutValidCredentials - " + (result ? "прошел" : "не прошел"));
 
             return result;

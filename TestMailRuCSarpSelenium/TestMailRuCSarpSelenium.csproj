@@ -69,6 +69,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Setup\Setup.cs" />
+    <Compile Include="Setup\XmlSetup.cs" />
     <Compile Include="Tests\AuthenticationTest.cs" />
     <Compile Include="Tests\BaseTest.cs" />
   </ItemGroup>

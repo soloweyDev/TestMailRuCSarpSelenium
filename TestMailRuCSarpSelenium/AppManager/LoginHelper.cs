@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using OpenQA.Selenium;
 
 namespace UnitTest
@@ -11,7 +10,7 @@ namespace UnitTest
 
         public bool IsLogedIn()
         {
-            if (!manager.Navigation.WaitElementById("PH_authLink"))
+            if (!manager.Navigation.WaitElement(By.Id("PH_authLink")))
                 return false;
 
             return IsElementPresent(By.Id("PH_authLink"));
@@ -37,12 +36,15 @@ namespace UnitTest
                     }
                 }
 
+                //manager.Navigation.OpenHomePage();
                 manager.InputText(By.Id("mailbox:login"), account.Login);
                 manager.Click(By.Id("mailbox:submit"));
 
                 manager.InputText(By.Id("mailbox:password"), account.Password);
                 manager.Click(By.Id("mailbox:submit"));
-                Thread.Sleep(3000);
+
+                if (!manager.Navigation.WaitElement(By.XPath($"//i[@id='PH_user-email' and text() = '{account.Login.ToLower()}@mail.ru']"), 10))
+                    return false;
 
                 if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
                     result = true;
@@ -78,8 +80,8 @@ namespace UnitTest
                     }
                 }
 
+                //manager.Navigation.OpenHomePage();
                 manager.Click(By.Id("PH_authLink"));
-                Thread.Sleep(2000);
                 var frames = manager.FindElements(By.TagName("iframe"));
                 manager.SwitchTo(frames.Count - 1);
                 manager.InputText(By.Name("Login"), account.Login);
@@ -87,7 +89,9 @@ namespace UnitTest
 
                 manager.InputText(By.Name("Password"), account.Password);
                 manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button"));
-                Thread.Sleep(3000);
+
+                if (!manager.Navigation.WaitElement(By.XPath($"//i[@id='PH_user-email' and text() = '{account.Login.ToLower()}@mail.ru']"), 10))
+                    return false;
 
                 manager.SwitchTo(0);
                 if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
@@ -112,11 +116,11 @@ namespace UnitTest
         public bool Logoff()
         {
             manager.Log.Write("Проверяем залогинены ли мы.");
-            if (IsLogedIn())
+            if (!IsLogedIn())
             {
                 manager.Log.Write("Мы залогинены. Будем пытаться разлогинится.");
                 manager.Click(By.Id("PH_logoutLink"));
-                return manager.Navigation.WaitElementById("PH_authLink") ? true : false;
+                return manager.Navigation.WaitElement(By.Id("PH_authLink"));
             }
             manager.Log.Write("Мы не залогинены.");
             return false;

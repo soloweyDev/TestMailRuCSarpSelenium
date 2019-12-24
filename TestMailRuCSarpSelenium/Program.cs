@@ -6,6 +6,8 @@ namespace UnitTest
     {
         static void Main(string[] args)
         {
+            //XmlSetup.WriteXml();
+
             string login = args[0];
             string password = args[1];
 
