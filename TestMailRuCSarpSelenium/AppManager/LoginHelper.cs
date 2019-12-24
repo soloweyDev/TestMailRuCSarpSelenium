@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Threading;
 using OpenQA.Selenium;
 
 namespace UnitTest
 {
     public class LoginHelper : BaseHelper
     {
+        By AuthLink = By.Id("PH_authLink");
+
         public LoginHelper(ApplicationManager manager) : base(manager)
         { }
 
         public bool IsLogedIn()
         {
-            if (!manager.Navigation.WaitElement(By.Id("PH_authLink")))
+            if (!manager.Navigation.WaitElement(AuthLink))
                 return false;
 
-            return IsElementPresent(By.Id("PH_authLink"));
+            return IsElementPresent(AuthLink);
         }
 
         public bool IsLogedIn(AccountData account)
@@ -36,7 +39,6 @@ namespace UnitTest
                     }
                 }
 
-                //manager.Navigation.OpenHomePage();
                 manager.InputText(By.Id("mailbox:login"), account.Login);
                 manager.Click(By.Id("mailbox:submit"));
 
@@ -80,8 +82,7 @@ namespace UnitTest
                     }
                 }
 
-                //manager.Navigation.OpenHomePage();
-                manager.Click(By.Id("PH_authLink"));
+                manager.Click(AuthLink);
                 var frames = manager.FindElements(By.TagName("iframe"));
                 manager.SwitchTo(frames.Count - 1);
                 manager.InputText(By.Name("Login"), account.Login);
@@ -89,11 +90,11 @@ namespace UnitTest
 
                 manager.InputText(By.Name("Password"), account.Password);
                 manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button"));
+                manager.Driver.SwitchTo().DefaultContent();
 
                 if (!manager.Navigation.WaitElement(By.XPath($"//i[@id='PH_user-email' and text() = '{account.Login.ToLower()}@mail.ru']"), 10))
                     return false;
 
-                manager.SwitchTo(0);
                 if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
                     result = true;
             }
@@ -120,7 +121,13 @@ namespace UnitTest
             {
                 manager.Log.Write("Мы залогинены. Будем пытаться разлогинится.");
                 manager.Click(By.Id("PH_logoutLink"));
-                return manager.Navigation.WaitElement(By.Id("PH_authLink"));
+                if (manager.Navigation.WaitElement(AuthLink))
+                {
+                    manager.Click(By.LinkText("Mail.ru"));
+                    return true;
+                }
+                else
+                    return false;
             }
             manager.Log.Write("Мы не залогинены.");
             return false;
