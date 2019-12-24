@@ -1,12 +1,22 @@
 ﻿using System;
-using System.Threading;
 using OpenQA.Selenium;
 
 namespace UnitTest
 {
     public class LoginHelper : BaseHelper
     {
-        By AuthLink = By.Id("PH_authLink");
+        private readonly By AuthLink = By.Id("PH_authLink");
+        private readonly By LogoutLink = By.Id("PH_logoutLink");
+        private readonly By MailboxLogin = By.Id("mailbox:login");
+        private readonly By MailboxSubmit = By.Id("mailbox:submit");
+        private readonly By MailboxPassword = By.Id("mailbox:password");
+        private readonly By UserMail = By.Id("PH_user-email");
+        private readonly By Iframe = By.TagName("iframe");
+        private readonly By IframeLogin = By.Name("Login");
+        private readonly By IframePassword = By.Name("Password");
+        private readonly By IframeSubmit = By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div[2]//div[3]//div//div[1]//button");
+        private readonly By IframeSubmit2 = By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button");
+        private readonly By MailLink = By.LinkText("Mail.ru");
 
         public LoginHelper(ApplicationManager manager) : base(manager)
         { }
@@ -21,7 +31,7 @@ namespace UnitTest
 
         public bool IsLogedIn(AccountData account)
         {
-            return IsLogedIn() && manager.FindElement(By.Id("PH_user-email")).Text == (account.Login.ToLower() + "@mail.ru");
+            return IsLogedIn() && manager.FindElement(UserMail).Text == (account.Login.ToLower() + "@mail.ru");
         }
 
         public bool Login(AccountData account)
@@ -35,20 +45,20 @@ namespace UnitTest
                 {
                     if (IsLogedIn(account))
                     {
-                        manager.Click(By.Id("PH_logoutLink"));
+                        manager.Click(LogoutLink);
                     }
                 }
 
-                manager.InputText(By.Id("mailbox:login"), account.Login);
-                manager.Click(By.Id("mailbox:submit"));
+                manager.InputText(MailboxLogin, account.Login);
+                manager.Click(MailboxSubmit);
 
-                manager.InputText(By.Id("mailbox:password"), account.Password);
-                manager.Click(By.Id("mailbox:submit"));
+                manager.InputText(MailboxPassword, account.Password);
+                manager.Click(MailboxSubmit);
 
                 if (!manager.Navigation.WaitElement(By.XPath($"//i[@id='PH_user-email' and text() = '{account.Login.ToLower()}@mail.ru']"), 10))
-                    return false;
+                    result = false;
 
-                if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
+                if (!result && manager.FindElement(UserMail).Text == account.Login.ToLower() + "@mail.ru")
                     result = true;
             }
             catch (Exception ex)
@@ -56,10 +66,7 @@ namespace UnitTest
                 manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
-            if (result)
-            {
-                result = Logoff();
-            }
+            Logoff();
 
             string res = result ? "прошел" : "не прошел";
             manager.Log.Write($"Тест Login завершился с результатом - {res}");
@@ -78,24 +85,24 @@ namespace UnitTest
                 {
                     if (IsLogedIn(account))
                     {
-                        manager.Click(By.Id("PH_logoutLink"));
+                        manager.Click(LogoutLink);
                     }
                 }
 
                 manager.Click(AuthLink);
-                var frames = manager.FindElements(By.TagName("iframe"));
+                var frames = manager.FindElements(Iframe);
                 manager.SwitchTo(frames.Count - 1);
-                manager.InputText(By.Name("Login"), account.Login);
-                manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div[2]//div[3]//div//div[1]//button"));
+                manager.InputText(IframeLogin, account.Login);
+                manager.Click(IframeSubmit);
 
-                manager.InputText(By.Name("Password"), account.Password);
-                manager.Click(By.XPath("//html//body//div[1]//div[3]//div//div[3]//div//div[2]//div//form//div[2]//div//div[3]//div//div[1]/div//button"));
+                manager.InputText(IframePassword, account.Password);
+                manager.Click(IframeSubmit2);
                 manager.Driver.SwitchTo().DefaultContent();
 
                 if (!manager.Navigation.WaitElement(By.XPath($"//i[@id='PH_user-email' and text() = '{account.Login.ToLower()}@mail.ru']"), 10))
-                    return false;
+                    result = false;
 
-                if (manager.FindElement(By.Id("PH_user-email")).Text == account.Login.ToLower() + "@mail.ru")
+                if (!result && manager.FindElement(UserMail).Text == account.Login.ToLower() + "@mail.ru")
                     result = true;
             }
             catch (Exception ex)
@@ -103,10 +110,7 @@ namespace UnitTest
                 manager.Log.Write($"Ошибка: {ex.Message}");
             }
 
-            if (result)
-            {
-                result = Logoff();
-            }
+            Logoff();
 
             string res = result ? "прошел" : "не прошел";
             manager.Log.Write($"Тест LoginFrame завершился с результатом - {res}");
@@ -116,21 +120,25 @@ namespace UnitTest
 
         public bool Logoff()
         {
+            bool result = false;
             manager.Log.Write("Проверяем залогинены ли мы.");
             if (!IsLogedIn())
             {
                 manager.Log.Write("Мы залогинены. Будем пытаться разлогинится.");
-                manager.Click(By.Id("PH_logoutLink"));
+                manager.Click(LogoutLink);
                 if (manager.Navigation.WaitElement(AuthLink))
-                {
-                    manager.Click(By.LinkText("Mail.ru"));
-                    return true;
-                }
-                else
-                    return false;
+                    result = true;
             }
-            manager.Log.Write("Мы не залогинены.");
-            return false;
+            if (!result) manager.Log.Write("Мы не залогинены.");
+
+            OpenPage();
+            return result;
+        }
+
+        private void OpenPage()
+        {
+            manager.Click(MailLink);
+            manager.Navigation.WaitElement(MailboxLogin);
         }
     }
 }
